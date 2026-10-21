@@ -4,17 +4,9 @@
 
 ## 1. 一批数据怎样用于训练？
 
-```mermaid
-flowchart TD
-    I["生成或复用一批训练实例"] --> O["policy_old 采样合法动作"]
-    O --> E["环境派工并返回奖励"]
-    E --> M["Memory 保存特征、动作、旧概率和奖励"]
-    M --> D{"本批轨迹结束？"}
-    D -->|否| O
-    D -->|是| R["计算回报；执行 PPO 更新"]
-    R --> C["同步 policy_old；清空 Memory"]
-    C --> I
-```
+![PPO 轨迹采集与参数更新双区循环](../assets/ppo_training_cycle.png)
+
+**图示：** 左侧为与环境交互的采集循环，右侧为使用同批轨迹的更新阶段。蓝色表示策略采样，绿色表示环境交互与轨迹记录，金色表示更新计算。两阶段之间传递整批轨迹，并在更新后同步旧策略、清空缓存。
 
 `Memory` 虽被注释为“经验回放缓冲区”，实际流程是**采集一批轨迹，更新若干轮，然后清空**。不能直接按 DQN 的长期经验池理解。
 
@@ -33,7 +25,7 @@ $$
 L_{\mathrm{clip}}=
 \mathbb E_t\!\left[
 \min\left(\rho_tA_t,\,
-\operatorname{clip}(\rho_t,1-\epsilon,1+\epsilon)A_t\right)
+\mathrm{clip}(\rho_t,1-\epsilon,1+\epsilon)A_t\right)
 \right]
 $$
 
